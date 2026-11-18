@@ -47,10 +47,8 @@ const Navbar = () => {
         {/* Mobile Navigation */}
         <div className="md:hidden">
           <Sheet>
-            <SheetTrigger>
-              <Button variant="outline" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
+            <SheetTrigger className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border">
+              <Menu className="h-5 w-5" />
             </SheetTrigger>
 
             <SheetContent side="right" className={"conatiner mx-auto ps-4"}>
