@@ -85,75 +85,58 @@ const Navbar = () => {
               </PopoverTrigger>
 
               <PopoverContent align="end" className="w-64 p-3">
-                <Popover>
-                  <PopoverTrigger className="rounded-full outline-none">
-                    <Avatar className="h-9 w-9 cursor-pointer border">
-                      <AvatarImage
-                        src={user?.image ?? ""}
-                        alt={user?.name ?? "User"}
-                      />
-                      <AvatarFallback className="bg-blue-100 font-semibold text-blue-600">
-                        {user?.name?.charAt(0).toUpperCase() ?? "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </PopoverTrigger>
+                <div className="flex items-center gap-3 border-b pb-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage
+                      src={user.image ?? ""}
+                      alt={user.name ?? "User"}
+                    />
+                    <AvatarFallback>
+                      {user.name?.charAt(0).toUpperCase() ?? "U"}
+                    </AvatarFallback>
+                  </Avatar>
 
-                  <PopoverContent align="end" className="w-64 p-3">
-                    <div className="flex items-center gap-3 border-b pb-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={user?.image ?? ""}
-                          alt={user?.name ?? "User"}
-                        />
-                        <AvatarFallback>
-                          {user?.name?.charAt(0).toUpperCase() ?? "U"}
-                        </AvatarFallback>
-                      </Avatar>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">
+                      {user.name}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {user.email}
+                    </p>
+                    <Badge variant="secondary" className="mt-1 capitalize">
+                      {user.role ?? "User"}
+                    </Badge>
+                  </div>
+                </div>
 
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold">
-                          {user?.name}
-                        </p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {user?.email}
-                        </p>
+                <div className="space-y-1 py-2">
+                  <Link
+                    href={dashboardHref}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
 
-                        <Badge variant="secondary" className="mt-1 capitalize">
-                          {user?.role ?? "User"}
-                        </Badge>
-                      </div>
-                    </div>
+                  <Link
+                    href="/dashboard/profile"
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
+                  >
+                    <UserRound className="h-4 w-4" />
+                    Update Profile
+                  </Link>
+                </div>
 
-                    <div className="space-y-1 py-2">
-                      <Link
-                        href={dashboardHref}
-                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
-                      >
-                        <LayoutDashboard className="h-4 w-4" />
-                        Dashboard
-                      </Link>
-
-                      <Link
-                        href="/dashboard/profile"
-                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
-                      >
-                        <UserRound className="h-4 w-4" />
-                        Update Profile
-                      </Link>
-                    </div>
-
-                    <div className="border-t pt-2">
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
-                        onClick={handleSignOut}
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Sign Out
-                      </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <div className="border-t pt-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </div>
               </PopoverContent>
             </Popover>
           ) : (

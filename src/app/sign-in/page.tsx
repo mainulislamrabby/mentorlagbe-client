@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { toast } from "sonner";
 
 const SignInPage = () => {
   const router = useRouter();
@@ -28,32 +29,44 @@ const SignInPage = () => {
 
     const formData = new FormData(e.currentTarget);
 
-    // TODO: Implement email/password sign-in
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const { error } = await authClient.signIn.email({
-      email,
-      password,
-    });
+    try {
+      const { error } = await authClient.signIn.email({
+        email,
+        password,
+      });
 
-    setIsLoading(false);
+      if (error) {
+        toast.error(error.message || "Failed to sign in.");
+        return;
+      }
 
-    if (error) {
-      // TODO: Show error toast
-      return;
+      toast.success("Signed in successfully!");
+
+      router.push("/");
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    router.push("/");
-    router.refresh();
   };
 
   const handleGoogleSignIn = async () => {
-    // TODO: Implement Google sign-in
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/",
-    });
+    try {
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+
+      if (error) {
+        toast.error(error.message || "Google sign-in failed.");
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   return (

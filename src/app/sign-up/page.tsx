@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const SignUpPage = () => {
   const router = useRouter();
@@ -41,32 +42,43 @@ const SignUpPage = () => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    // TODO: Implement role-based registration
-    const { error } = await authClient.signUp.email({
-      name,
-      email,
-      password,
-      // Role must be supported by your Better Auth additionalFields config.
-      role,
-    });
+    try {
+      const { error } = await authClient.signUp.email({
+        name,
+        email,
+        password,
+        role,
+      });
 
-    setIsLoading(false);
+      if (error) {
+        toast.error(error.message || "Failed to create account.");
+        return;
+      }
 
-    if (error) {
-      // TODO: Show error toast
-      return;
+      toast.success("Account created successfully!");
+
+      router.push("/");
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    router.push("/");
-    router.refresh();
   };
 
   const handleGoogleSignUp = async () => {
-    // TODO: Implement Google sign-up and role handling
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/",
-    });
+    try {
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+
+      if (error) {
+        toast.error(error.message || "Google sign-up failed.");
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   return (
