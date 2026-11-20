@@ -25,7 +25,7 @@ export const uploadBannerImage = async (file: File): Promise<string> => {
 };
 
 export const createTuition = async (data: TuitionData) => {
-  const res = await fetch(`${BASE_URL}/post-tuition`, {
+  const res = await fetch(`${BASE_URL}/tuitions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

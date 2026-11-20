@@ -22,47 +22,47 @@ import TuitionCard, {
 } from "@/components/dashboard/tutor/TuitionCard";
 
 // Temporary demo data. Replace this with data from your API.
-// const tuitions: Tuition[] = [
-//   {
-//     _id: "1",
-//     title: "Experienced Mathematics Tutor for Class 10",
-//     subject: "Mathematics",
-//     classLevel: "Class 9-10",
-//     mode: "Offline",
-//     location: "Mirpur, Dhaka",
-//     monthlyFee: 5000,
-//     daysPerWeek: 5,
-//     approvalStatus: "approved",
-//     isActive: true,
-//     createdAt: "2026-11-15",
-//   },
-//   {
-//     _id: "2",
-//     title: "Physics and Chemistry Tutor Needed",
-//     subject: "Physics",
-//     classLevel: "Class 11-12",
-//     mode: "Online",
-//     location: "Online",
-//     monthlyFee: 6000,
-//     daysPerWeek: 4,
-//     approvalStatus: "pending",
-//     isActive: true,
-//     createdAt: "2026-11-17",
-//   },
-//   {
-//     _id: "3",
-//     title: "English Tutor for Class 8 Student",
-//     subject: "English",
-//     classLevel: "Class 6-8",
-//     mode: "Offline",
-//     location: "Uttara, Dhaka",
-//     monthlyFee: 3500,
-//     daysPerWeek: 3,
-//     approvalStatus: "rejected",
-//     isActive: false,
-//     createdAt: "2026-11-18",
-//   },
-// ];
+const tuitions: Tuition[] = [
+  {
+    _id: "1",
+    title: "Experienced Mathematics Tutor for Class 10",
+    subject: "Mathematics",
+    classLevel: "Class 9-10",
+    mode: "Offline",
+    location: "Mirpur, Dhaka",
+    monthlyFee: 5000,
+    daysPerWeek: 5,
+    approvalStatus: "approved",
+    isActive: true,
+    createdAt: "2026-11-15",
+  },
+  {
+    _id: "2",
+    title: "Physics and Chemistry Tutor Needed",
+    subject: "Physics",
+    classLevel: "Class 11-12",
+    mode: "Online",
+    location: "Online",
+    monthlyFee: 6000,
+    daysPerWeek: 4,
+    approvalStatus: "pending",
+    isActive: true,
+    createdAt: "2026-11-17",
+  },
+  {
+    _id: "3",
+    title: "English Tutor for Class 8 Student",
+    subject: "English",
+    classLevel: "Class 6-8",
+    mode: "Offline",
+    location: "Uttara, Dhaka",
+    monthlyFee: 3500,
+    daysPerWeek: 3,
+    approvalStatus: "rejected",
+    isActive: false,
+    createdAt: "2026-11-18",
+  },
+];
 
 const MyTuitionsPage = () => {
   // Search handler
