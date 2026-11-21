@@ -32,6 +32,7 @@ export interface Tuition {
   approvalStatus: "pending" | "approved" | "rejected";
   isActive: boolean;
   createdAt: string;
+  description: string;
 }
 
 interface TuitionTableProps {
