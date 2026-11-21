@@ -19,6 +19,24 @@ export interface AdminStats {
   }[];
 }
 
+export interface AdminTuition {
+  _id: string;
+  title: string;
+  subject: string;
+  classLevel: string;
+  mode: "Online" | "Offline";
+  location: string;
+  monthlyFee: number;
+  daysPerWeek: number;
+  bannerImage: string;
+  description: string;
+  tutorName: string;
+  tutorEmail: string;
+  approvalStatus: "pending" | "approved" | "rejected";
+  isActive: boolean;
+  createdAt: string;
+}
+
 export const getAllUsers = async (): Promise<AdminUser[]> => {
   const response = await fetch(`${BASE_URL}/users`);
 
@@ -34,6 +52,36 @@ export const getAdminStats = async (): Promise<AdminStats> => {
 
   if (!response.ok) {
     throw new Error("Failed to fetch admin statistics.");
+  }
+
+  return response.json();
+};
+
+export const getAllTuitions = async (): Promise<AdminTuition[]> => {
+  const response = await fetch(`${BASE_URL}/admin/tuitions`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch tuition posts.");
+  }
+
+  return response.json();
+};
+
+export const updateTuitionApproval = async (
+  id: string,
+  approvalStatus: "approved" | "rejected",
+) => {
+  const response = await fetch(`${BASE_URL}/admin/tuitions/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ approvalStatus }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || "Failed to update tuition status.");
   }
 
   return response.json();
