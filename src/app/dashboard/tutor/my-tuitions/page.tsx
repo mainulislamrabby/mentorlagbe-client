@@ -5,12 +5,22 @@ import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
-import { getTuition } from "@/lib/actions/tutor";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+
+import {
+  getTuition,
+  deleteTuition,
+  toggleTuitionStatus,
+  updateTuition,
+} from "@/lib/actions/tutor";
+
+import EditTuitionDialog, {
+  type TuitionFormData,
+} from "@/components/dashboard/tutor/EditTuitionDialog";
 
 import {
   Select,
@@ -23,9 +33,13 @@ import {
 import TuitionCard, {
   type Tuition,
 } from "@/components/dashboard/tutor/TuitionCard";
+import { toast } from "sonner";
 
 const MyTuitionsPage = () => {
   const { data: session, isPending } = authClient.useSession();
+
+  const [selectedTuition, setSelectedTuition] = useState<Tuition | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const [tuitions, setTuitions] = useState<Tuition[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,15 +116,69 @@ const MyTuitionsPage = () => {
   };
 
   const handleEdit = (id: string) => {
-    // TODO: Open the edit form or navigate to the edit page.
+    const tuition = tuitions.find((item) => item._id === id);
+
+    if (tuition) {
+      setSelectedTuition(tuition);
+      setIsEditOpen(true);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    // TODO: Confirm deletion and call your DELETE API.
+  const handleSaveEdit = async (data: TuitionFormData) => {
+    if (!tutorEmail || !selectedTuition) {
+      throw new Error("Unable to identify the tuition owner.");
+    }
+
+    await updateTuition(selectedTuition._id, tutorEmail, data);
+
+    setTuitions((previous) =>
+      previous.map((tuition) =>
+        tuition._id === selectedTuition._id ? { ...tuition, ...data } : tuition,
+      ),
+    );
   };
 
-  const handleToggleStatus = (id: string, isActive: boolean) => {
-    // TODO: Call your API to update the tuition's isActive status.
+  const handleDelete = async (id: string) => {
+    if (!tutorEmail) {
+      toast.error("Unable to identify your account.");
+      return;
+    }
+
+    try {
+      await deleteTuition(id, tutorEmail);
+
+      setTuitions((previous) =>
+        previous.filter((tuition) => tuition._id !== id),
+      );
+
+      toast.success("Tuition deleted successfully.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete tuition.",
+      );
+    }
+  };
+
+  const handleToggleStatus = async (id: string, isActive: boolean) => {
+    if (!tutorEmail) return;
+
+    try {
+      setError("");
+
+      await toggleTuitionStatus(id, tutorEmail, isActive);
+
+      setTuitions((previous) =>
+        previous.map((tuition) =>
+          tuition._id === id ? { ...tuition, isActive } : tuition,
+        ),
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to update tuition status.",
+      );
+    }
   };
 
   const accountError =
@@ -288,6 +356,21 @@ const MyTuitionsPage = () => {
             )}
           </CardContent>
         </Card>
+        {selectedTuition && (
+          <EditTuitionDialog
+            key={selectedTuition._id}
+            tuition={selectedTuition}
+            open={isEditOpen}
+            onOpenChange={(open) => {
+              setIsEditOpen(open);
+
+              if (!open) {
+                setSelectedTuition(null);
+              }
+            }}
+            onSave={handleSaveEdit}
+          />
+        )}
       </div>
     </main>
   );
