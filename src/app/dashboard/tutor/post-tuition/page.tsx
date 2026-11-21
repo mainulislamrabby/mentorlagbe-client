@@ -17,6 +17,8 @@ import { uploadBannerImage } from "@/lib/actions/tutor";
 
 import type { TuitionData } from "@/types/dataTypes";
 
+import { authClient } from "@/lib/auth-client";
+
 import {
   Card,
   CardContent,
@@ -36,6 +38,7 @@ import { createTuition } from "@/lib/actions/tutor";
 
 const PostTuitionPage = () => {
   const router = useRouter();
+  const { data: session } = authClient.useSession();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileName, setSelectedFileName] = useState("");
@@ -83,7 +86,14 @@ const PostTuitionPage = () => {
       };
 
       // Send tuition data to Express API
-      await createTuition(tuitionData);
+      if (!session?.user) {
+        throw new Error("Please sign in to post a tuition.");
+      }
+
+      await createTuition(tuitionData, {
+        tutorEmail: session.user.email,
+        tutorName: session.user.name,
+      });
 
       toast.success("Tuition posted successfully! Waiting for admin approval.");
 

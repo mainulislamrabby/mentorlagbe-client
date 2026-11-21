@@ -1,7 +1,7 @@
+
+import Image from "next/image";
 import {
-  BookOpen,
   CalendarDays,
-  Clock,
   MapPin,
   Pencil,
   Power,
@@ -10,7 +10,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export interface Tuition {
   _id: string;
@@ -21,127 +28,144 @@ export interface Tuition {
   location: string;
   monthlyFee: number;
   daysPerWeek: number;
+  bannerImage?: string;
   approvalStatus: "pending" | "approved" | "rejected";
   isActive: boolean;
   createdAt: string;
 }
 
-interface TuitionCardProps {
-  tuition: Tuition;
+interface TuitionTableProps {
+  tuitions: Tuition[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleStatus: (id: string, isActive: boolean) => void;
 }
 
+const approvalStyles = {
+  pending: "bg-amber-100 text-amber-700 hover:bg-amber-100",
+  approved: "bg-green-100 text-green-700 hover:bg-green-100",
+  rejected: "bg-red-100 text-red-700 hover:bg-red-100",
+};
+
 const TuitionCard = ({
-  tuition,
+  tuitions,
   onEdit,
   onDelete,
   onToggleStatus,
-}: TuitionCardProps) => {
-  const approvalStyles = {
-    pending: "bg-amber-100 text-amber-700 hover:bg-amber-100",
-    approved: "bg-green-100 text-green-700 hover:bg-green-100",
-    rejected: "bg-red-100 text-red-700 hover:bg-red-100",
-  };
-
+}: TuitionTableProps) => {
   return (
-    <Card className="gap-0 border-0 shadow-sm">
-      <CardHeader className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <CardTitle className="text-base font-bold text-slate-900">
-            {tuition.title}
-          </CardTitle>
+    <div className="overflow-x-auto rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="min-w-65">Tuition</TableHead>
+            <TableHead>Location</TableHead>
+            <TableHead>Fee</TableHead>
+            <TableHead>Approval</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
 
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">{tuition.subject}</Badge>
-            <Badge variant="outline">{tuition.classLevel}</Badge>
-            <Badge variant="outline">{tuition.mode}</Badge>
-          </div>
-        </div>
+        <TableBody>
+          {tuitions.map((tuition) => (
+            <TableRow key={tuition._id}>
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  {tuition.bannerImage ? (
+                    <Image
+                      src={tuition.bannerImage}
+                      alt={tuition.title}
+                      width={64}
+                      height={48}
+                      className="h-12 w-16 rounded-md object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-16 items-center justify-center rounded-md bg-slate-100 text-xs text-slate-500">
+                      No Image
+                    </div>
+                  )}
 
-        <div className="flex flex-wrap gap-2">
-          <Badge className={approvalStyles[tuition.approvalStatus]}>
-            {tuition.approvalStatus.charAt(0).toUpperCase() +
-              tuition.approvalStatus.slice(1)}
-          </Badge>
+                  <div className="min-w-0 space-y-1">
+                    <p className="max-w-55 truncate font-medium text-slate-900">
+                      {tuition.title}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {tuition.subject} · {tuition.classLevel} · {tuition.mode}
+                    </p>
+                  </div>
+                </div>
+              </TableCell>
 
-          <Badge
-            className={
-              tuition.isActive
-                ? "bg-blue-100 text-blue-700 hover:bg-blue-100"
-                : "bg-slate-200 text-slate-600 hover:bg-slate-200"
-            }
-          >
-            {tuition.isActive ? "Active" : "Closed"}
-          </Badge>
-        </div>
-      </CardHeader>
+              <TableCell>
+                <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                  <MapPin size={14} />
+                  {tuition.location}
+                </div>
+                <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+                  <CalendarDays size={13} />
+                  {tuition.daysPerWeek} days/week
+                </p>
+              </TableCell>
 
-      <CardContent className="space-y-5 pt-4">
-        <div className="grid gap-4 text-sm text-slate-600 sm:grid-cols-2">
-          <div className="flex items-center gap-2">
-            <BookOpen size={17} className="text-blue-600" />
-            <span>{tuition.subject}</span>
-          </div>
+              <TableCell>
+                <span className="font-semibold text-blue-600">
+                  ৳{tuition.monthlyFee.toLocaleString("en-BD")}
+                </span>
+                <p className="text-xs text-slate-500">per month</p>
+              </TableCell>
 
-          <div className="flex items-center gap-2">
-            <MapPin size={17} className="text-blue-600" />
-            <span>{tuition.location}</span>
-          </div>
+              <TableCell>
+                <Badge className={approvalStyles[tuition.approvalStatus]}>
+                  {tuition.approvalStatus}
+                </Badge>
+              </TableCell>
 
-          <div className="flex items-center gap-2">
-            <CalendarDays size={17} className="text-blue-600" />
-            <span>{tuition.daysPerWeek} days per week</span>
-          </div>
+              <TableCell>
+                <Badge
+                  variant={tuition.isActive ? "default" : "secondary"}
+                >
+                  {tuition.isActive ? "Active" : "Closed"}
+                </Badge>
+              </TableCell>
 
-          <div className="flex items-center gap-2">
-            <Clock size={17} className="text-blue-600" />
-            <span>
-              Posted: {new Date(tuition.createdAt).toLocaleDateString()}
-            </span>
-          </div>
-        </div>
+              <TableCell>
+                <div className="flex justify-end gap-1">
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => onEdit(tuition._id)}
+                    title="Edit tuition"
+                  >
+                    <Pencil size={15} />
+                  </Button>
 
-        <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-lg font-bold text-blue-600">
-            ৳{tuition.monthlyFee.toLocaleString("en-BD")}
-            <span className="ml-1 text-xs font-normal text-slate-500">
-              / month
-            </span>
-          </p>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() =>
+                      onToggleStatus(tuition._id, tuition.isActive)
+                    }
+                    title={tuition.isActive ? "Close tuition" : "Activate tuition"}
+                  >
+                    <Power size={15} />
+                  </Button>
 
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(tuition._id)}
-            >
-              <Pencil size={15} />
-              Edit
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onToggleStatus(tuition._id, tuition.isActive)}
-            >
-              <Power size={15} />
-              {tuition.isActive ? "Close" : "Activate"}
-            </Button>
-
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => onDelete(tuition._id)}
-            >
-              <Trash2 size={15} />
-              Delete
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    onClick={() => onDelete(tuition._id)}
+                    title="Delete tuition"
+                  >
+                    <Trash2 size={15} />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

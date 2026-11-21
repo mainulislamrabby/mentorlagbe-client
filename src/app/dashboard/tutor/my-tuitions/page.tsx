@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Plus, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { BookOpen, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+
+import { authClient } from "@/lib/auth-client";
+import { getTuition } from "@/lib/actions/tutor";
 
 import { Input } from "@/components/ui/input";
-
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
 import { Card, CardContent } from "@/components/ui/card";
 
 import {
@@ -21,88 +24,110 @@ import TuitionCard, {
   type Tuition,
 } from "@/components/dashboard/tutor/TuitionCard";
 
-// Temporary demo data. Replace this with data from your API.
-const tuitions: Tuition[] = [
-  {
-    _id: "1",
-    title: "Experienced Mathematics Tutor for Class 10",
-    subject: "Mathematics",
-    classLevel: "Class 9-10",
-    mode: "Offline",
-    location: "Mirpur, Dhaka",
-    monthlyFee: 5000,
-    daysPerWeek: 5,
-    approvalStatus: "approved",
-    isActive: true,
-    createdAt: "2026-11-15",
-  },
-  {
-    _id: "2",
-    title: "Physics and Chemistry Tutor Needed",
-    subject: "Physics",
-    classLevel: "Class 11-12",
-    mode: "Online",
-    location: "Online",
-    monthlyFee: 6000,
-    daysPerWeek: 4,
-    approvalStatus: "pending",
-    isActive: true,
-    createdAt: "2026-11-17",
-  },
-  {
-    _id: "3",
-    title: "English Tutor for Class 8 Student",
-    subject: "English",
-    classLevel: "Class 6-8",
-    mode: "Offline",
-    location: "Uttara, Dhaka",
-    monthlyFee: 3500,
-    daysPerWeek: 3,
-    approvalStatus: "rejected",
-    isActive: false,
-    createdAt: "2026-11-18",
-  },
-];
-
 const MyTuitionsPage = () => {
-  // Search handler
-  const handleSearch = (_value: string) => {
-    // TODO: Implement tuition search.
+  const { data: session, isPending } = authClient.useSession();
+
+  const [tuitions, setTuitions] = useState<Tuition[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [search, setSearch] = useState("");
+  const [approvalFilter, setApprovalFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState("all");
+
+  const tutorEmail = session?.user?.email;
+
+  // Fetch logged-in tutor's tuitions
+  useEffect(() => {
+    if (isPending || !tutorEmail) return;
+
+    let cancelled = false;
+
+    const fetchTuitions = async () => {
+      try {
+        const data = await getTuition(tutorEmail);
+
+        if (!cancelled) {
+          setTuitions(data);
+          setError("");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setError(
+            error instanceof Error ? error.message : "Failed to load tuitions.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTuitions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isPending, tutorEmail]);
+
+  // Search and filter
+  const filteredTuitions = useMemo(() => {
+    return tuitions.filter((tuition) => {
+      const searchValue = search.toLowerCase();
+
+      const matchesSearch =
+        tuition.title.toLowerCase().includes(searchValue) ||
+        tuition.subject.toLowerCase().includes(searchValue);
+
+      const matchesApproval =
+        approvalFilter === "all" || tuition.approvalStatus === approvalFilter;
+
+      const matchesActive =
+        activeFilter === "all" ||
+        (activeFilter === "active" && tuition.isActive) ||
+        (activeFilter === "closed" && !tuition.isActive);
+
+      return matchesSearch && matchesApproval && matchesActive;
+    });
+  }, [tuitions, search, approvalFilter, activeFilter]);
+
+  const hasFilters =
+    search !== "" || approvalFilter !== "all" || activeFilter !== "all";
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setApprovalFilter("all");
+    setActiveFilter("all");
   };
 
-  // Approval status filter handler
-  const handleApprovalFilter = (_value: string | null) => {
-    // TODO: Filter by approval status.
+  const handleEdit = (id: string) => {
+    // TODO: Open the edit form or navigate to the edit page.
   };
 
-  // Active status filter handler
-  const handleActiveFilter = (_value: string | null) => {
-    // TODO: Filter by active/closed status.
-  };
-
-  // Edit handler
-  const handleEdit = (_id: string) => {
-    // TODO: Navigate to the edit page or open an edit form.
-  };
-
-  // Delete handler
-  const handleDelete = (_id: string) => {
+  const handleDelete = (id: string) => {
     // TODO: Confirm deletion and call your DELETE API.
   };
 
-  // Toggle active status handler
-  const handleToggleStatus = (_id: string, _isActive: boolean) => {
-    // TODO: Call your API to toggle isActive.
+  const handleToggleStatus = (id: string, isActive: boolean) => {
+    // TODO: Call your API to update the tuition's isActive status.
   };
 
-  const totalTuitions = tuitions.length;
+  const accountError =
+    !isPending && !tutorEmail
+      ? "Unable to find your account. Please sign in again."
+      : error;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl space-y-7">
+    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-7">
         {/* Page Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
+            <Badge variant="secondary" className="mb-3">
+              Tutor Dashboard
+            </Badge>
+
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               My Tuitions
             </h1>
@@ -114,17 +139,18 @@ const MyTuitionsPage = () => {
 
           <Link
             href="/dashboard/tutor/post-tuition"
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            className="inline-flex h-9 w-fit items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
           >
             <Plus size={17} />
             Post New Tuition
           </Link>
         </div>
 
-        {/* Tuition List */}
-        <Card className="gap-0 border-0 shadow-sm">
-          <CardContent className="space-y-5 p-5 sm:p-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        {/* Tuition Listings */}
+        <Card className="gap-0 border border-slate-200 shadow-sm">
+          <CardContent className="space-y-6 p-4 sm:p-6">
+            {/* Section Header */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-lg font-bold text-slate-900">
                   Your Tuition Listings
@@ -135,40 +161,49 @@ const MyTuitionsPage = () => {
                 </p>
               </div>
 
-              <Badge variant="secondary">{totalTuitions} Listings</Badge>
+              <Badge variant="outline" className="w-fit px-3 py-1">
+                {filteredTuitions.length} of {tuitions.length} listings
+              </Badge>
             </div>
 
             {/* Search and Filters */}
             <div className="grid gap-3 md:grid-cols-3">
-              <div className="relative md:col-span-1">
+              <div className="relative">
                 <Search
                   size={17}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
 
                 <Input
-                  placeholder="Search by tuition title..."
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by title or subject..."
                   className="h-10 pl-9"
-                  onChange={(event) => handleSearch(event.target.value)}
                 />
               </div>
 
-              <Select onValueChange={handleApprovalFilter}>
+              <Select
+                value={approvalFilter}
+                onValueChange={(value) => setApprovalFilter(value ?? "all")}
+              >
                 <SelectTrigger className="h-10 w-full">
-                  <SelectValue placeholder="All approval statuses" />
+                  <SelectValue placeholder="Approval status" />
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="all">All approval statuses</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="approved">Approved</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Select onValueChange={handleActiveFilter}>
+              <Select
+                value={activeFilter}
+                onValueChange={(value) => setActiveFilter(value ?? "all")}
+              >
                 <SelectTrigger className="h-10 w-full">
-                  <SelectValue placeholder="All availability" />
+                  <SelectValue placeholder="Availability" />
                 </SelectTrigger>
 
                 <SelectContent>
@@ -179,42 +214,78 @@ const MyTuitionsPage = () => {
               </Select>
             </div>
 
-            {/* Tuition Cards */}
-            <div className="space-y-4">
-              {tuitions.length > 0 ? (
-                tuitions.map((tuition) => (
-                  <TuitionCard
-                    key={tuition._id}
-                    tuition={tuition}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onToggleStatus={handleToggleStatus}
-                  />
-                ))
-              ) : (
-                <div className="rounded-xl border border-dashed bg-slate-50 px-5 py-12 text-center">
-                  <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                    <BookOpen size={23} />
-                  </div>
+            {/* Filter Information */}
+            {hasFilters && (
+              <div className="flex flex-wrap items-center gap-2">
+                <SlidersHorizontal size={15} className="text-slate-500" />
 
-                  <h3 className="font-semibold text-slate-900">
-                    No tuitions posted yet
-                  </h3>
+                <span className="text-sm text-slate-500">Filters applied</span>
 
-                  <p className="mt-2 text-sm text-slate-500">
-                    Create your first tuition listing to connect with students.
-                  </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className="h-7 gap-1 text-blue-600 hover:text-blue-700"
+                >
+                  <X size={14} />
+                  Clear filters
+                </Button>
+              </div>
+            )}
 
+            {/* Tuition Table / States */}
+            {isPending || (tutorEmail && loading) ? (
+              <div className="py-14 text-center text-sm text-slate-500">
+                Loading your tuitions...
+              </div>
+            ) : accountError ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-10 text-center">
+                <p className="text-sm text-red-600">{accountError}</p>
+              </div>
+            ) : filteredTuitions.length > 0 ? (
+              <TuitionCard
+                tuitions={filteredTuitions}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onToggleStatus={handleToggleStatus}
+              />
+            ) : (
+              <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-14 text-center">
+                <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                  <BookOpen size={25} />
+                </div>
+
+                <h3 className="font-semibold text-slate-900">
+                  {tuitions.length === 0
+                    ? "No tuitions posted yet"
+                    : "No matching tuitions found"}
+                </h3>
+
+                <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">
+                  {tuitions.length === 0
+                    ? "Create your first tuition listing to connect with students."
+                    : "Try changing your search keyword or filters."}
+                </p>
+
+                {tuitions.length === 0 ? (
                   <Link
                     href="/dashboard/tutor/post-tuition"
-                    className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    className="mt-5 inline-flex h-9 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                   >
                     <Plus size={16} />
                     Post a Tuition
                   </Link>
-                </div>
-              )}
-            </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={handleClearFilters}
+                    className="mt-5"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

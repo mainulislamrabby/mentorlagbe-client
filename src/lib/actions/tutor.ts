@@ -1,3 +1,4 @@
+
 import type { TuitionData } from "@/types/dataTypes";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -24,19 +25,40 @@ export const uploadBannerImage = async (file: File): Promise<string> => {
   return result.data.url;
 };
 
-export const createTuition = async (data: TuitionData) => {
+export const createTuition = async (
+  data: TuitionData,
+  tutor: { tutorEmail: string; tutorName: string },
+) => {
   const res = await fetch(`${BASE_URL}/tuitions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      ...data,
+      ...tutor,
+    }),
   });
 
   const result = await res.json();
 
   if (!res.ok) {
     throw new Error(result.message || "Failed to create tuition");
+  }
+
+  return result;
+};
+
+export const getTuition = async (tutorEmail: string) => {
+  const res = await fetch(
+    `${BASE_URL}/tuitions?tutorEmail=${encodeURIComponent(tutorEmail)}`,
+    { cache: "no-store" },
+  );
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to fetch tuitions");
   }
 
   return result;
