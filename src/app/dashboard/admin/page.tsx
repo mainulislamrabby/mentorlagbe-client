@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getAdminStats, type AdminStats } from "@/lib/actions/admin";
 import Link from "next/link";
 import {
   Users,
@@ -12,36 +16,43 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const stats = [
-  {
-    title: "Total Users",
-    value: "—",
-    description: "All registered users",
-    icon: Users,
-    color: "bg-blue-100 text-blue-600",
-  },
-  {
-    title: "Total Tutors",
-    value: "—",
-    description: "Registered tutors",
-    icon: GraduationCap,
-    color: "bg-purple-100 text-purple-600",
-  },
-  {
-    title: "Total Tuitions",
-    value: "—",
-    description: "Pending and approved listings",
-    icon: ClipboardList,
-    color: "bg-amber-100 text-amber-600",
-  },
-  {
-    title: "Stripe Revenue",
-    value: "—",
-    description: "Total successful payments",
-    icon: Wallet,
-    color: "bg-green-100 text-green-600",
-  },
-];
+// const stats = [
+//   {
+//     title: "Total Users",
+//     value: statsData?.totalUsers ?? 0,
+//     description: "All registered users",
+//     icon: Users,
+//     color: "bg-blue-100 text-blue-600",
+//   },
+//   {
+//     title: "Total Tutors",
+//     value: statsData?.totalTutors ?? 0,
+//     description: "Registered tutors",
+//     icon: GraduationCap,
+//     color: "bg-purple-100 text-purple-600",
+//   },
+//   {
+//     title: "Total Tuitions",
+//     value:
+//       (statsData?.pendingTuitions ?? 0) +
+//       (statsData?.approvedTuitions ?? 0),
+//     description: "Pending and approved listings",
+//     icon: ClipboardList,
+//     color: "bg-amber-100 text-amber-600",
+//   },
+//   {
+//     title: "Stripe Revenue",
+//     value: statsData?.revenueByCurrency
+//       .map(
+//         (item) =>
+//           `${item.total.toLocaleString()} ${item._id.toUpperCase()}`,
+//       )
+//       .join(" / ") || "0",
+//     description: "Total successful payments",
+//     icon: Wallet,
+//     color: "bg-green-100 text-green-600",
+//   },
+// ];
 
 const adminLinks = [
   {
@@ -65,6 +76,65 @@ const adminLinks = [
 ];
 
 const AdminDashboardPage = () => {
+  const [statsData, setStatsData] = useState<AdminStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getAdminStats();
+        setStatsData(data);
+      } catch (error) {
+        setError(
+          error instanceof Error ? error.message : "Failed to load statistics.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const stats = [
+    {
+      title: "Total Users",
+      value: statsData?.totalUsers ?? 0,
+      description: "All registered users",
+      icon: Users,
+      color: "bg-blue-100 text-blue-600",
+    },
+    {
+      title: "Total Tutors",
+      value: statsData?.totalTutors ?? 0,
+      description: "Registered tutors",
+      icon: GraduationCap,
+      color: "bg-purple-100 text-purple-600",
+    },
+    {
+      title: "Total Tuitions",
+      value:
+        (statsData?.pendingTuitions ?? 0) + (statsData?.approvedTuitions ?? 0),
+      description: "Pending and approved listings",
+      icon: ClipboardList,
+      color: "bg-amber-100 text-amber-600",
+    },
+    {
+      title: "Stripe Revenue",
+      value:
+        statsData?.revenueByCurrency
+          .map(
+            (item) =>
+              `${item.total.toLocaleString()} ${item._id.toUpperCase()}`,
+          )
+          .join(" / ") || "0",
+      description: "Total successful payments",
+      icon: Wallet,
+      color: "bg-green-100 text-green-600",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -111,7 +181,7 @@ const AdminDashboardPage = () => {
 
                   <CardContent>
                     <p className="text-3xl font-bold text-slate-900">
-                      {stat.value}
+                      {loading ? "..." : error ? "—" : stat.value}
                     </p>
                     <p className="mt-1 text-xs text-slate-500">
                       {stat.description}
@@ -139,6 +209,7 @@ const AdminDashboardPage = () => {
                   <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
                     <Clock size={20} />
                   </div>
+
                   <div>
                     <p className="font-semibold text-slate-800">Pending</p>
                     <p className="text-xs text-slate-500">
@@ -146,7 +217,14 @@ const AdminDashboardPage = () => {
                     </p>
                   </div>
                 </div>
-                <span className="text-2xl font-bold">—</span>
+
+                <span className="text-2xl font-bold">
+                  {loading
+                    ? "..."
+                    : error
+                      ? "—"
+                      : (statsData?.pendingTuitions ?? 0)}
+                </span>
               </div>
 
               <div className="flex items-center justify-between rounded-lg border bg-white p-4">
@@ -154,6 +232,7 @@ const AdminDashboardPage = () => {
                   <div className="rounded-lg bg-green-100 p-2 text-green-600">
                     <CheckCircle2 size={20} />
                   </div>
+
                   <div>
                     <p className="font-semibold text-slate-800">Approved</p>
                     <p className="text-xs text-slate-500">
@@ -161,7 +240,14 @@ const AdminDashboardPage = () => {
                     </p>
                   </div>
                 </div>
-                <span className="text-2xl font-bold">—</span>
+
+                <span className="text-2xl font-bold">
+                  {loading
+                    ? "..."
+                    : error
+                      ? "—"
+                      : (statsData?.approvedTuitions ?? 0)}
+                </span>
               </div>
             </CardContent>
           </Card>
