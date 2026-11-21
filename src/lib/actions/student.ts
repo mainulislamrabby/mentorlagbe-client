@@ -7,6 +7,22 @@ export interface StudentStats {
   currentPlan: "free" | "pro";
 }
 
+export interface StudentApplication {
+  _id: string;
+  tuitionId: string;
+  tuitionTitle: string;
+  subject: string;
+  monthlyFee: number;
+  tutorEmail: string;
+  studentName: string;
+  studentEmail: string;
+  studentPhone: string;
+  preferredSchedule: string;
+  studentNote: string;
+  status: "pending" | "accepted" | "rejected";
+  appliedAt: string;
+}
+
 export const getStudentStats = async (
   studentEmail: string,
 ): Promise<StudentStats> => {
@@ -19,4 +35,32 @@ export const getStudentStats = async (
   }
 
   return response.json();
+};
+
+export const getStudentApplications = async (
+  studentEmail: string,
+): Promise<StudentApplication[]> => {
+  const response = await fetch(
+    `${BASE_URL}/student/applications?studentEmail=${encodeURIComponent(studentEmail)}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch student applications.");
+  }
+
+  return response.json();
+};
+
+export const deleteStudentApplication = async (
+  id: string,
+  studentEmail: string,
+): Promise<void> => {
+  const response = await fetch(
+    `${BASE_URL}/student/applications/${id}?studentEmail=${encodeURIComponent(studentEmail)}`,
+    { method: "DELETE" },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to cancel application.");
+  }
 };
