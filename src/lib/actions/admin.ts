@@ -86,3 +86,33 @@ export const updateTuitionApproval = async (
 
   return response.json();
 };
+
+export interface AdminTransaction {
+  _id: string;
+  userEmail: string;
+  userName: string;
+  userRole: "student" | "tutor";
+  planName: string;
+  amount: number;
+  currency: string;
+  transactionId: string;
+  stripeSessionId: string;
+  paymentStatus: "paid";
+  paidAt: string;
+}
+
+export const getAdminTransactions = async (): Promise<
+  AdminTransaction[]
+> => {
+  const response = await fetch(`${BASE_URL}/admin/transactions`);
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to fetch transactions.",
+    );
+  }
+
+  return result;
+};
