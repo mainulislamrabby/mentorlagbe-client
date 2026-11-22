@@ -1,3 +1,5 @@
+import { getAuthToken } from "../auth-client";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export interface AdminUser {
@@ -101,17 +103,23 @@ export interface AdminTransaction {
   paidAt: string;
 }
 
-export const getAdminTransactions = async (): Promise<
-  AdminTransaction[]
-> => {
-  const response = await fetch(`${BASE_URL}/admin/transactions`);
+export const getAdminTransactions = async (): Promise<AdminTransaction[]> => {
+  const token = await getAuthToken();
+
+  if (!token) {
+    throw new Error("Authentication required.");
+  }
+
+  const response = await fetch(`${BASE_URL}/admin/transactions`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   const result = await response.json();
 
   if (!response.ok) {
-    throw new Error(
-      result.message || "Failed to fetch transactions.",
-    );
+    throw new Error(result.message || "Failed to fetch transactions.");
   }
 
   return result;

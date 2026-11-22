@@ -2,11 +2,39 @@
 
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { authClient } from "@/lib/auth-client";
 
 const PaymentSuccessPage = () => {
+  const router = useRouter();
+
+  const { data: session, isPending } = authClient.useSession();
+
+  useEffect(() => {
+    if (isPending) return;
+
+    if (!session?.user) {
+      router.push("/sign-in");
+    }
+  }, [session, isPending, router]);
+
+  const user = session?.user as
+    | {
+        role?: "student" | "tutor" | "admin";
+      }
+    | undefined;
+
+  const dashboardPath =
+    user?.role === "student"
+      ? "/dashboard/student"
+      : user?.role === "tutor"
+        ? "/dashboard/tutor"
+        : "/";
+
   return (
     <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-4">
       <Card className="w-full max-w-lg border-0 shadow-sm">
@@ -25,7 +53,7 @@ const PaymentSuccessPage = () => {
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link href="/dashboard">
+            <Link href={dashboardPath}>
               <Button>Go to Dashboard</Button>
             </Link>
 
