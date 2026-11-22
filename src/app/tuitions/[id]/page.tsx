@@ -306,7 +306,7 @@ export default function TuitionDetailsPage() {
                     </p>
                     <Button
                       className="w-full bg-[#2563EB] hover:bg-[#1D4ED8]"
-                      onClick={() => router.push("/login")}
+                      onClick={() => router.push("/sign-in")}
                     >
                       Sign In
                     </Button>
@@ -317,6 +317,25 @@ export default function TuitionDetailsPage() {
                   </p>
                 ) : (
                   <form onSubmit={handleApplication} className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="studentName">Student Name</Label>
+                        <Input
+                          id="studentName"
+                          value={session.user.name || ""}
+                          disabled
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="studentEmail">Email</Label>
+                        <Input
+                          id="studentEmail"
+                          value={session.user.email || ""}
+                          disabled
+                        />
+                      </div>
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="studentPhone">Phone Number *</Label>
                       <Input
