@@ -49,9 +49,9 @@ const plans = [
 
 const PricingSection = () => {
   const router = useRouter();
-  const [loadingRole, setLoadingRole] = useState<
-    "student" | "tutor" | null
-  >(null);
+  const [loadingRole, setLoadingRole] = useState<"student" | "tutor" | null>(
+    null,
+  );
 
   const { data: session } = authClient.useSession();
 
@@ -62,9 +62,7 @@ const PricingSection = () => {
       }
     | undefined;
 
-  const handleSubscribe = async (
-    role: "student" | "tutor",
-  ) => {
+  const handleSubscribe = async (role: "student" | "tutor") => {
     if (!session?.user) {
       toast.error("Please sign in before subscribing.");
 
@@ -98,12 +96,10 @@ const PricingSection = () => {
 
       const checkoutUrl = await createCheckoutSession();
 
-      window.location.href = checkoutUrl;
+      window.location.assign(checkoutUrl);
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Unable to start checkout.",
+        error instanceof Error ? error.message : "Unable to start checkout.",
       );
     } finally {
       setLoadingRole(null);
@@ -155,9 +151,7 @@ const PricingSection = () => {
                           {plan.freePrice}
                         </span>
 
-                        <span className="text-sm text-slate-500">
-                          / month
-                        </span>
+                        <span className="text-sm text-slate-500">/ month</span>
                       </div>
                     </div>
 
@@ -170,11 +164,7 @@ const PricingSection = () => {
                       ))}
                     </ul>
 
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      disabled
-                    >
+                    <Button variant="outline" className="w-full" disabled>
                       {isCurrentRole && !isPro
                         ? "Current Free Plan"
                         : "Free Plan"}
@@ -193,9 +183,7 @@ const PricingSection = () => {
                           {plan.proPrice}
                         </span>
 
-                        <span className="text-sm text-slate-500">
-                          / month
-                        </span>
+                        <span className="text-sm text-slate-500">/ month</span>
                       </div>
                     </div>
 
@@ -210,11 +198,7 @@ const PricingSection = () => {
 
                     <Button
                       className="mt-6 w-full"
-                      disabled={
-                        !isCurrentRole ||
-                        isPro ||
-                        loadingRole !== null
-                      }
+                      disabled={!isCurrentRole || isPro || loadingRole !== null}
                       onClick={() => handleSubscribe(plan.role)}
                     >
                       {loadingRole === plan.role ? (
@@ -238,10 +222,7 @@ const PricingSection = () => {
                     {session?.user && !isCurrentRole && (
                       <p className="mt-2 text-center text-xs text-slate-500">
                         This plan is for{" "}
-                        {plan.role === "student"
-                          ? "students"
-                          : "tutors"}
-                        .
+                        {plan.role === "student" ? "students" : "tutors"}.
                       </p>
                     )}
                   </div>

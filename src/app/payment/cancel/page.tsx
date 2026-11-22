@@ -20,18 +20,18 @@ const PaymentCancelPage = () => {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            Your payment was cancelled. No subscription has been
-            activated on your account.
+            Your payment was cancelled. No subscription has been activated on
+            your account.
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button asChild>
-              <Link href="/pricing">Return to Pricing</Link>
-            </Button>
+            <Link href="/pricing">
+              <Button>Return to Pricing</Button>
+            </Link>
 
-            <Button variant="outline" asChild>
-              <Link href="/">Back to Home</Link>
-            </Button>
+            <Link href="/">
+              <Button variant="outline">Back to Home</Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

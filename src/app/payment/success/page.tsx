@@ -20,18 +20,18 @@ const PaymentSuccessPage = () => {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            Your Pro subscription payment was successful. Your account
-            will be upgraded to Pro after Stripe confirms the payment.
+            Your Pro subscription payment was successful. Your account will be
+            upgraded to Pro after Stripe confirms the payment.
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button asChild>
-              <Link href="/dashboard">Go to Dashboard</Link>
-            </Button>
+            <Link href="/dashboard">
+              <Button>Go to Dashboard</Button>
+            </Link>
 
-            <Button variant="outline" asChild>
-              <Link href="/">Back to Home</Link>
-            </Button>
+            <Link href="/">
+              <Button variant="outline">Back to Home</Button>
+            </Link>
           </div>
         </CardContent>
       </Card>
