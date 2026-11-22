@@ -1,8 +1,25 @@
 import type { Tuition, TuitionData } from "@/types/dataTypes";
 import type { TuitionFormData } from "@/components/dashboard/tutor/EditTuitionDialog";
+import { getAuthToken } from "../auth-client";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+
+export interface TutorApplication {
+  _id: string;
+  tuitionId: string;
+  tuitionTitle: string;
+  subject: string;
+  monthlyFee: number;
+  tutorEmail: string;
+  studentName: string;
+  studentEmail: string;
+  studentPhone: string;
+  preferredSchedule: string;
+  studentNote: string;
+  status: "pending" | "accepted" | "rejected";
+  appliedAt: string;
+}
 
 export const uploadBannerImage = async (file: File): Promise<string> => {
   const formData = new FormData();
@@ -151,4 +168,44 @@ export const getTuitionDetails = async (id: string): Promise<Tuition> => {
   }
 
   return result;
+};
+
+export const getTutorApplications = async (): Promise<TutorApplication[]> => {
+  const token = await getAuthToken();
+
+  const response = await fetch(`${BASE_URL}/tutor/applications`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to fetch applications.");
+  }
+
+  return result;
+};
+
+export const updateTutorApplicationStatus = async (
+  id: string,
+  status: "accepted" | "rejected",
+): Promise<void> => {
+  const token = await getAuthToken();
+
+  const response = await fetch(`${BASE_URL}/tutor/applications/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to update application status.");
+  }
 };
