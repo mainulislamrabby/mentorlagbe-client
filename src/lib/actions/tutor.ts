@@ -1,4 +1,4 @@
-import type { TuitionData } from "@/types/dataTypes";
+import type { Tuition, TuitionData } from "@/types/dataTypes";
 import type { TuitionFormData } from "@/components/dashboard/tutor/EditTuitionDialog";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -117,4 +117,26 @@ export const toggleTuitionStatus = async (
   }
 
   return result;
+};
+
+export const getBrowseTuitions = async (filters?: {
+  search?: string;
+  subject?: string;
+  classLevel?: string;
+  mode?: string;
+}): Promise<Tuition[]> => {
+  const params = new URLSearchParams();
+
+  if (filters?.search) params.set("search", filters.search);
+  if (filters?.subject) params.set("subject", filters.subject);
+  if (filters?.classLevel) params.set("classLevel", filters.classLevel);
+  if (filters?.mode) params.set("mode", filters.mode);
+
+  const response = await fetch(`${BASE_URL}/tuitions?${params.toString()}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch tuitions.");
+  }
+
+  return response.json();
 };
