@@ -8,3 +8,13 @@ export const authClient = createAuthClient({
   baseURL: process.env.BETTER_AUTH_URL,
   plugins: [inferAdditionalFields<typeof auth>(), jwtClient()],
 });
+
+export const getAuthToken = async () => {
+  const { data, error } = await authClient.token();
+
+  if (error || !data?.token) {
+    throw new Error("Unable to get authentication token.");
+  }
+
+  return data.token;
+};
