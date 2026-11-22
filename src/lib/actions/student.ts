@@ -1,4 +1,5 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { getAuthToken } from "@/lib/auth-client";
 
 export interface StudentStats {
   totalApplications: number;
@@ -21,6 +22,13 @@ export interface StudentApplication {
   studentNote: string;
   status: "pending" | "accepted" | "rejected";
   appliedAt: string;
+}
+
+export interface SubmitApplicationData {
+  tuitionId: string;
+  studentPhone: string;
+  preferredSchedule: string;
+  studentNote?: string;
 }
 
 export const getStudentStats = async (
@@ -62,5 +70,26 @@ export const deleteStudentApplication = async (
 
   if (!response.ok) {
     throw new Error("Failed to cancel application.");
+  }
+};
+
+export const submitStudentApplication = async (
+  data: SubmitApplicationData,
+): Promise<void> => {
+  const token = await getAuthToken();
+
+  const response = await fetch(`${BASE_URL}/applications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to submit application.");
   }
 };
