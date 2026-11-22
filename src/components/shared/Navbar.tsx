@@ -54,17 +54,19 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-gray-700 transition-colors hover:text-blue-600"
-            >
-              {link.name}
-            </Link>
-          ))}
-        </div>
+        {!user && (
+          <div className="hidden items-center gap-8 md:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-gray-700 transition-colors hover:text-blue-600"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* Desktop Auth */}
         <div className="hidden items-center gap-3 md:flex">
@@ -168,17 +170,19 @@ const Navbar = () => {
                   MentorLagbe
                 </Link>
 
-                <div className="flex flex-col gap-4">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="text-sm font-medium text-gray-700 hover:text-blue-600"
-                    >
-                      {link.name}
-                    </Link>
-                  ))}
-                </div>
+                {!user && (
+                  <div className="flex flex-col gap-4">
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="text-sm font-medium text-gray-700 hover:text-blue-600"
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
 
                 <div className="border-t pt-4">
                   {isPending ? (
