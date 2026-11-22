@@ -140,3 +140,15 @@ export const getBrowseTuitions = async (filters?: {
 
   return response.json();
 };
+
+export const getTuitionDetails = async (id: string): Promise<Tuition> => {
+  const response = await fetch(`${BASE_URL}/tuitions/${id}`);
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to fetch tuition details.");
+  }
+
+  return result;
+};
