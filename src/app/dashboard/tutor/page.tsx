@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   BookOpen,
@@ -17,37 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const stats = [
-  {
-    title: "Total Tuitions Posted",
-    value: "—",
-    description: "Your total tuition listings",
-    icon: BookOpen,
-    color: "bg-blue-100 text-blue-600",
-  },
-  {
-    title: "Active / Approved",
-    value: "—",
-    description: "Approved and active tuitions",
-    icon: ClipboardList,
-    color: "bg-green-100 text-green-600",
-  },
-  {
-    title: "Total Applicants",
-    value: "—",
-    description: "Students who applied",
-    icon: Users,
-    color: "bg-purple-100 text-purple-600",
-  },
-  {
-    title: "Current Plan",
-    value: "—",
-    description: "Your subscription plan",
-    icon: Crown,
-    color: "bg-amber-100 text-amber-600",
-  },
-];
+import { getTutorStats, type TutorStats } from "@/lib/actions/tutor";
 
 const quickActions = [
   {
@@ -71,6 +44,63 @@ const quickActions = [
 ];
 
 const TutorDashboardPage = () => {
+  const [stats, setStats] = useState<TutorStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const result = await getTutorStats();
+        setStats(result);
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load dashboard statistics.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const statCards = [
+    {
+      title: "Total Tuitions Posted",
+      value: stats?.totalTuitions ?? 0,
+      description: "Your total tuition listings",
+      icon: BookOpen,
+      color: "bg-blue-100 text-blue-600",
+    },
+    {
+      title: "Active / Approved",
+      value: stats?.activeApprovedTuitions ?? 0,
+      description: "Approved and active tuitions",
+      icon: ClipboardList,
+      color: "bg-green-100 text-green-600",
+    },
+    {
+      title: "Total Applicants",
+      value: stats?.totalApplicants ?? 0,
+      description: "Students who applied",
+      icon: Users,
+      color: "bg-purple-100 text-purple-600",
+    },
+    {
+      title: "Current Plan",
+      value: stats?.currentPlan === "pro" ? "Pro" : "Free",
+      description: "Your subscription plan",
+      icon: Crown,
+      color: "bg-amber-100 text-amber-600",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -105,8 +135,14 @@ const TutorDashboardPage = () => {
             Your Statistics
           </h2>
 
+          {error && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat) => {
+            {statCards.map((stat) => {
               const Icon = stat.icon;
 
               return (
@@ -123,7 +159,7 @@ const TutorDashboardPage = () => {
 
                   <CardContent>
                     <p className="text-3xl font-bold text-slate-900">
-                      {stat.value}
+                      {loading ? "—" : stat.value}
                     </p>
 
                     <p className="mt-1 text-xs text-slate-500">
@@ -137,34 +173,36 @@ const TutorDashboardPage = () => {
         </section>
 
         {/* Subscription Banner */}
-        <section className="mt-8">
-          <Card className="overflow-hidden border-0 bg-blue-600 text-white shadow-sm">
-            <CardContent className="flex flex-col justify-between gap-5 p-6 sm:flex-row sm:items-center">
-              <div>
-                <div className="mb-2 flex items-center gap-2">
-                  <Crown size={20} />
+        {stats?.currentPlan !== "pro" && (
+          <section className="mt-8">
+            <Card className="overflow-hidden border-0 bg-blue-600 text-white shadow-sm">
+              <CardContent className="flex flex-col justify-between gap-5 p-6 sm:flex-row sm:items-center">
+                <div>
+                  <div className="mb-2 flex items-center gap-2">
+                    <Crown size={20} />
 
-                  <h2 className="text-lg font-semibold">
-                    Upgrade to Tutor Pro
-                  </h2>
+                    <h2 className="text-lg font-semibold">
+                      Upgrade to Tutor Pro
+                    </h2>
+                  </div>
+
+                  <p className="max-w-xl text-sm text-blue-100">
+                    Unlock unlimited tuition postings and grow your teaching
+                    opportunities with Tutor Pro.
+                  </p>
                 </div>
 
-                <p className="max-w-xl text-sm text-blue-100">
-                  Unlock unlimited tuition postings and grow your teaching
-                  opportunities with Tutor Pro.
-                </p>
-              </div>
-
-              <Link
-                href="/pricing"
-                className="inline-flex w-fit items-center gap-2 rounded-md bg-white px-4 py-2.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50"
-              >
-                Explore Pro Plan
-                <ArrowUpRight size={17} />
-              </Link>
-            </CardContent>
-          </Card>
-        </section>
+                <Link
+                  href="/pricing"
+                  className="inline-flex w-fit items-center gap-2 rounded-md bg-white px-4 py-2.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50"
+                >
+                  Explore Pro Plan
+                  <ArrowUpRight size={17} />
+                </Link>
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
         {/* Quick Actions */}
         <section className="mt-8">
