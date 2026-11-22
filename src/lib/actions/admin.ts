@@ -10,6 +10,7 @@ export interface AdminUser {
   role: "student" | "tutor" | "admin";
   createdAt: string;
 }
+
 export interface AdminStats {
   totalUsers: number;
   totalTutors: number;
@@ -39,56 +40,6 @@ export interface AdminTuition {
   createdAt: string;
 }
 
-export const getAllUsers = async (): Promise<AdminUser[]> => {
-  const response = await fetch(`${BASE_URL}/users`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch users.");
-  }
-
-  return response.json();
-};
-
-export const getAdminStats = async (): Promise<AdminStats> => {
-  const response = await fetch(`${BASE_URL}/admin/stats`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch admin statistics.");
-  }
-
-  return response.json();
-};
-
-export const getAllTuitions = async (): Promise<AdminTuition[]> => {
-  const response = await fetch(`${BASE_URL}/admin/tuitions`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch tuition posts.");
-  }
-
-  return response.json();
-};
-
-export const updateTuitionApproval = async (
-  id: string,
-  approvalStatus: "approved" | "rejected",
-) => {
-  const response = await fetch(`${BASE_URL}/admin/tuitions/${id}/status`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ approvalStatus }),
-  });
-
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.message || "Failed to update tuition status.");
-  }
-
-  return response.json();
-};
-
 export interface AdminTransaction {
   _id: string;
   userEmail: string;
@@ -103,24 +54,89 @@ export interface AdminTransaction {
   paidAt: string;
 }
 
-export const getAdminTransactions = async (): Promise<AdminTransaction[]> => {
+// Reusable JWT authorization headers
+const getAuthHeaders = async () => {
   const token = await getAuthToken();
 
-  if (!token) {
-    throw new Error("Authentication required.");
-  }
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
 
-  const response = await fetch(`${BASE_URL}/admin/transactions`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+// Get all users
+export const getAllUsers = async (): Promise<AdminUser[]> => {
+  const response = await fetch(`${BASE_URL}/users`, {
+    headers: await getAuthHeaders(),
   });
 
-  const result = await response.json();
-
   if (!response.ok) {
-    throw new Error(result.message || "Failed to fetch transactions.");
+    const data = await response.json();
+    throw new Error(data.message || "Failed to fetch users.");
   }
 
-  return result;
+  return response.json();
+};
+
+// Get admin statistics
+export const getAdminStats = async (): Promise<AdminStats> => {
+  const response = await fetch(`${BASE_URL}/admin/stats`, {
+    headers: await getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || "Failed to fetch admin statistics.");
+  }
+
+  return response.json();
+};
+
+// Get all tuition posts
+export const getAllTuitions = async (): Promise<AdminTuition[]> => {
+  const response = await fetch(`${BASE_URL}/admin/tuitions`, {
+    headers: await getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || "Failed to fetch tuition posts.");
+  }
+
+  return response.json();
+};
+
+// Update tuition approval status
+export const updateTuitionApproval = async (
+  id: string,
+  approvalStatus: "approved" | "rejected",
+) => {
+  const response = await fetch(`${BASE_URL}/admin/tuitions/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      ...(await getAuthHeaders()),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ approvalStatus }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || "Failed to update tuition status.");
+  }
+
+  return response.json();
+};
+
+// Get admin transactions
+export const getAdminTransactions = async (): Promise<AdminTransaction[]> => {
+  const response = await fetch(`${BASE_URL}/admin/transactions`, {
+    headers: await getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || "Failed to fetch transactions.");
+  }
+
+  return response.json();
 };
