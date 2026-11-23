@@ -33,7 +33,7 @@ const SignInPage = () => {
     const password = formData.get("password") as string;
 
     try {
-      const { error } = await authClient.signIn.email({
+      const { data, error } = await authClient.signIn.email({
         email,
         password,
       });
@@ -45,7 +45,18 @@ const SignInPage = () => {
 
       toast.success("Signed in successfully!");
 
-      router.push("/");
+      const role = data?.user?.role;
+
+      if (role === "student") {
+        router.push("/dashboard/student");
+      } else if (role === "tutor") {
+        router.push("/dashboard/tutor");
+      } else if (role === "admin") {
+        router.push("/dashboard/admin");
+      } else {
+        router.push("/");
+      }
+
       router.refresh();
     } catch {
       toast.error("Something went wrong. Please try again.");
@@ -68,7 +79,6 @@ const SignInPage = () => {
       toast.error("Something went wrong. Please try again.");
     }
   };
-
   return (
     <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-slate-50 px-4 py-12">
       <Card className="w-full max-w-md border-slate-200 shadow-sm">

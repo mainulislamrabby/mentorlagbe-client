@@ -15,8 +15,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useState } from "react";
 
 const Navbar = () => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
@@ -39,7 +41,6 @@ const Navbar = () => {
   const dashboardHref = user?.role ? `/dashboard/${user.role}` : "/dashboard";
 
   const handleSignOut = async () => {
-    // TODO: Implement Better Auth sign-out logic
     await authClient.signOut();
     router.push("/");
     router.refresh();
@@ -73,7 +74,7 @@ const Navbar = () => {
           {isPending ? (
             <div className="h-9 w-24 animate-pulse rounded-md bg-muted" />
           ) : user ? (
-            <Popover>
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger className="rounded-full outline-none">
                 <Avatar className="h-9 w-9 cursor-pointer border">
                   <AvatarImage
@@ -114,6 +115,7 @@ const Navbar = () => {
                 <div className="space-y-1 py-2">
                   <Link
                     href={dashboardHref}
+                    onClick={() => setIsPopoverOpen(false)}
                     className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
                   >
                     <LayoutDashboard className="h-4 w-4" />
@@ -122,6 +124,7 @@ const Navbar = () => {
 
                   <Link
                     href="/dashboard/profile"
+                    onClick={() => setIsPopoverOpen(false)}
                     className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
                   >
                     <UserRound className="h-4 w-4" />
