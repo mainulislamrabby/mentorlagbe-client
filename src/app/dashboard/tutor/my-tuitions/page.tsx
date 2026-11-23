@@ -59,7 +59,7 @@ const MyTuitionsPage = () => {
 
     const fetchTuitions = async () => {
       try {
-        const data = await getTuition(tutorEmail);
+        const data = await getTuition();
 
         if (!cancelled) {
           setTuitions(data);
@@ -129,7 +129,7 @@ const MyTuitionsPage = () => {
       throw new Error("Unable to identify the tuition owner.");
     }
 
-    await updateTuition(selectedTuition._id, tutorEmail, data);
+    await updateTuition(selectedTuition._id, data);
 
     setTuitions((previous) =>
       previous.map((tuition) =>
@@ -145,7 +145,7 @@ const MyTuitionsPage = () => {
     }
 
     try {
-      await deleteTuition(id, tutorEmail);
+      await deleteTuition(id);
 
       setTuitions((previous) =>
         previous.filter((tuition) => tuition._id !== id),
@@ -165,7 +165,7 @@ const MyTuitionsPage = () => {
     try {
       setError("");
 
-      await toggleTuitionStatus(id, tutorEmail, isActive);
+      await toggleTuitionStatus(id, isActive);
 
       setTuitions((previous) =>
         previous.map((tuition) =>

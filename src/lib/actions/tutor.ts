@@ -71,8 +71,8 @@ export const createTuition = async (data: TuitionData) => {
 };
 
 // Get logged-in tutor's own tuitions
-export const getTuition = async () => {
-  const response = await fetch(`${BASE_URL}/tuitions?mine=true`, {
+export const getTuition = async (): Promise<Tuition[]> => {
+  const response = await fetch(`${BASE_URL}/tutor/tuitions`, {
     headers: await getAuthHeaders(),
   });
 
@@ -140,6 +140,13 @@ export const toggleTuitionStatus = async (
 
   return result;
 };
+export interface BrowseTuitionsResponse {
+  tuitions: Tuition[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 // Browse approved tuitions (public)
 export const getBrowseTuitions = async (filters?: {
@@ -147,13 +154,18 @@ export const getBrowseTuitions = async (filters?: {
   subject?: string;
   classLevel?: string;
   mode?: string;
-}): Promise<Tuition[]> => {
+  page?: number;
+  limit?: number;
+}): Promise<BrowseTuitionsResponse> => {
   const params = new URLSearchParams();
 
   if (filters?.search) params.set("search", filters.search);
   if (filters?.subject) params.set("subject", filters.subject);
   if (filters?.classLevel) params.set("classLevel", filters.classLevel);
   if (filters?.mode) params.set("mode", filters.mode);
+
+  params.set("page", String(filters?.page ?? 1));
+  params.set("limit", String(filters?.limit ?? 6));
 
   const response = await fetch(`${BASE_URL}/tuitions?${params.toString()}`);
 
@@ -164,6 +176,7 @@ export const getBrowseTuitions = async (filters?: {
 
   return response.json();
 };
+
 
 // Get tuition details (public)
 export const getTuitionDetails = async (id: string): Promise<Tuition> => {

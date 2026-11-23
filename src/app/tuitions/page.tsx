@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -21,6 +20,9 @@ export default function BrowseTuitionsPage() {
   const [classLevel, setClassLevel] = useState("all");
   const [mode, setMode] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalTuitions, setTotalTuitions] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,15 +34,19 @@ export default function BrowseTuitionsPage() {
           subject: subject === "all" ? undefined : subject,
           classLevel: classLevel === "all" ? undefined : classLevel,
           mode: mode === "all" ? undefined : mode,
+          page,
+          limit: 6,
         });
 
-        if (!cancelled) setTuitions(data);
+        if (!cancelled) {
+          setTuitions(data.tuitions);
+          setTotalPages(data.totalPages);
+          setTotalTuitions(data.total);
+        }
       } catch (error) {
         if (!cancelled) {
           toast.error(
-            error instanceof Error
-              ? error.message
-              : "Failed to load tuitions.",
+            error instanceof Error ? error.message : "Failed to load tuitions.",
           );
         }
       } finally {
@@ -53,7 +59,7 @@ export default function BrowseTuitionsPage() {
     return () => {
       cancelled = true;
     };
-  }, [search, subject, classLevel, mode]);
+  }, [search, subject, classLevel, mode, page]);
 
   const resetFilters = () => {
     setLoading(true);
@@ -61,6 +67,7 @@ export default function BrowseTuitionsPage() {
     setSubject("all");
     setClassLevel("all");
     setMode("all");
+    setPage(1);
   };
 
   return (
@@ -78,14 +85,12 @@ export default function BrowseTuitionsPage() {
 
           <h1 className="text-3xl font-extrabold tracking-tight text-[#0F172A] sm:text-4xl lg:text-5xl">
             Explore{" "}
-            <span className="text-[#2563EB]">
-              Tuition Opportunities
-            </span>
+            <span className="text-[#2563EB]">Tuition Opportunities</span>
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-[#64748B] sm:text-base">
-            Discover quality tuition opportunities and connect with
-            experienced tutors who match your learning needs.
+            Discover quality tuition opportunities and connect with experienced
+            tutors who match your learning needs.
           </p>
 
           <div className="mt-7 flex flex-wrap justify-center gap-3">
@@ -111,18 +116,22 @@ export default function BrowseTuitionsPage() {
           mode={mode}
           onSearchChange={(value) => {
             setLoading(true);
+            setPage(1);
             setSearch(value);
           }}
           onSubjectChange={(value) => {
             setLoading(true);
+            setPage(1);
             setSubject(value || "all");
           }}
           onClassLevelChange={(value) => {
             setLoading(true);
+            setPage(1);
             setClassLevel(value || "all");
           }}
           onModeChange={(value) => {
             setLoading(true);
+            setPage(1);
             setMode(value || "all");
           }}
           onReset={resetFilters}
@@ -143,7 +152,7 @@ export default function BrowseTuitionsPage() {
           </div>
 
           <Badge className="border border-blue-100 bg-blue-50 px-3 py-1.5 text-[#2563EB] hover:bg-blue-50">
-            {tuitions.length} Tuitions
+            {totalTuitions} Tuitions
           </Badge>
         </div>
 
@@ -189,6 +198,51 @@ export default function BrowseTuitionsPage() {
             {tuitions.map((tuition) => (
               <TuitionCard key={tuition._id} tuition={tuition} />
             ))}
+          </div>
+        )}
+
+        {!loading && totalPages > 1 && (
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
+            <button
+              disabled={page === 1}
+              onClick={() => {
+                setLoading(true);
+                setPage((prev) => prev - 1);
+              }}
+              className="rounded-lg border border-blue-100 px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+              (pageNumber) => (
+                <button
+                  key={pageNumber}
+                  onClick={() => {
+                    setLoading(true);
+                    setPage(pageNumber);
+                  }}
+                  className={`size-10 rounded-lg text-sm font-semibold transition-colors ${
+                    page === pageNumber
+                      ? "bg-[#2563EB] text-white"
+                      : "border border-blue-100 text-[#2563EB] hover:bg-blue-50"
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              ),
+            )}
+
+            <button
+              disabled={page === totalPages}
+              onClick={() => {
+                setLoading(true);
+                setPage((prev) => prev + 1);
+              }}
+              className="rounded-lg border border-blue-100 px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
           </div>
         )}
       </section>
