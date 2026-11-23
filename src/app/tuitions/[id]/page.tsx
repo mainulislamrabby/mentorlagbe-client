@@ -12,6 +12,8 @@ import {
   Wifi,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Star } from "lucide-react";
+import { format } from "date-fns";
 
 import { authClient } from "@/lib/auth-client";
 import { getTuitionDetails } from "@/lib/actions/tutor";
@@ -274,6 +276,62 @@ export default function TuitionDetailsPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Student Reviews */}
+          <Card className="border-blue-100 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#0F172A]">
+                Student Reviews ({tuition.reviews?.length || 0})
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-5">
+              {!tuition.reviews?.length ? (
+                <p className="py-6 text-center text-sm text-[#64748B]">
+                  No reviews yet. Be the first to share your experience.
+                </p>
+              ) : (
+                tuition.reviews.map((review, index) => (
+                  <div
+                    key={`${review.studentName}-${index}`}
+                    className="space-y-3"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-[#0F172A]">
+                          {review.studentName}
+                        </p>
+                        <p className="text-xs text-[#64748B]">
+                          {format(new Date(review.createdAt), "dd MMM yyyy")}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <Star
+                            key={i}
+                            className={`size-4 ${
+                              i < review.rating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="whitespace-pre-line text-sm leading-6 text-[#64748B]">
+                      {review.feedback}
+                    </p>
+
+                    {index !== tuition.reviews!.length - 1 && (
+                      <Separator className="bg-blue-100" />
+                    )}
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
 
           {/* Fee and Application */}
           <aside className="space-y-6">

@@ -26,4 +26,12 @@ export interface Tuition {
   approvalStatus: "pending" | "approved" | "rejected";
   isActive: boolean;
   createdAt: string;
+  reviews?: TuitionReview[];
+}
+
+export interface TuitionReview {
+  studentName: string;
+  rating: number;
+  feedback: string;
+  createdAt: string;
 }
