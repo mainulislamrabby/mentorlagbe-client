@@ -27,7 +27,7 @@ const StudentDashboardPage = () => {
         setLoading(true);
         setError("");
 
-        const data = await getStudentStats(studentEmail);
+        const data = await getStudentStats();
 
         if (!cancelled) {
           setStats(data);
