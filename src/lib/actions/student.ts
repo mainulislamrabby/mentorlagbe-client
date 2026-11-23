@@ -102,3 +102,29 @@ export const submitStudentApplication = async (
     throw new Error(result.message || "Failed to submit application.");
   }
 };
+
+export interface SubmitReviewData {
+  rating: number;
+  feedback: string;
+}
+
+// Submit review for an accepted tuition
+export const submitTuitionReview = async (
+  tuitionId: string,
+  data: SubmitReviewData,
+): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/tuitions/${tuitionId}/reviews`, {
+    method: "POST",
+    headers: {
+      ...(await getAuthHeaders()),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to submit review.");
+  }
+};

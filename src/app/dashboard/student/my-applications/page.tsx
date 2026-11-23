@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-
-import { authClient } from "@/lib/auth-client";
 import {
   deleteStudentApplication,
   getStudentApplications,
+  submitTuitionReview,
   type StudentApplication,
 } from "@/lib/actions/student";
+import { Textarea } from "@/components/ui/textarea";
+
+import { authClient } from "@/lib/auth-client";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,6 +44,13 @@ export default function MyApplicationsPage() {
   const [applications, setApplications] = useState<StudentApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [reviewingApplicationId, setReviewingApplicationId] = useState<
+    string | null
+  >(null);
+  const [rating, setRating] = useState(5);
+  const [feedback, setFeedback] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewedTuitionIds, setReviewedTuitionIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (isPending || !studentEmail) return;
@@ -50,7 +59,7 @@ export default function MyApplicationsPage() {
 
     const loadApplications = async () => {
       try {
-        const data = await getStudentApplications(studentEmail);
+        const data = await getStudentApplications();
 
         if (!cancelled) {
           setApplications(data);
@@ -83,7 +92,7 @@ export default function MyApplicationsPage() {
     try {
       setDeletingId(id);
 
-      await deleteStudentApplication(id, studentEmail);
+      await deleteStudentApplication(id);
 
       setApplications((previous) =>
         previous.filter((application) => application._id !== id),
@@ -98,6 +107,30 @@ export default function MyApplicationsPage() {
       );
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleSubmitReview = async (tuitionId: string) => {
+    try {
+      setSubmittingReview(true);
+
+      await submitTuitionReview(tuitionId, {
+        rating,
+        feedback,
+      });
+
+      setReviewedTuitionIds((previous) => [...previous, tuitionId]);
+      setReviewingApplicationId(null);
+      setRating(5);
+      setFeedback("");
+
+      toast.success("Review submitted successfully.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit review.",
+      );
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -236,7 +269,6 @@ export default function MyApplicationsPage() {
                                 <AlertDialogCancel>
                                   Keep Application
                                 </AlertDialogCancel>
-
                                 <AlertDialogAction
                                   onClick={() => handleDelete(application._id)}
                                 >
@@ -246,11 +278,111 @@ export default function MyApplicationsPage() {
                             </AlertDialogContent>
                           </AlertDialog>
                         )}
+
+                        {application.status === "accepted" &&
+                          !reviewedTuitionIds.includes(
+                            application.tuitionId,
+                          ) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setReviewingApplicationId(application._id);
+                                setRating(5);
+                                setFeedback("");
+                              }}
+                            >
+                              Write Review
+                            </Button>
+                          )}
+
+                        {application.status === "accepted" &&
+                          reviewedTuitionIds.includes(
+                            application.tuitionId,
+                          ) && <Badge variant="secondary">Reviewed</Badge>}
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
+              {applications.map(
+                (application) =>
+                  reviewingApplicationId === application._id && (
+                    <Card key={application._id} className="mt-4">
+                      <CardHeader>
+                        <CardTitle>
+                          Review: {application.tuitionTitle}
+                        </CardTitle>
+                      </CardHeader>
+
+                      <CardContent className="space-y-4">
+                        <div>
+                          <p className="mb-2 text-sm font-medium">
+                            Your Rating
+                          </p>
+
+                          <div className="flex gap-2">
+                            {[1, 2, 3, 4, 5].map((value) => (
+                              <Button
+                                key={value}
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => setRating(value)}
+                                aria-label={`Rate ${value} stars`}
+                              >
+                                <Star
+                                  className={`h-6 w-6 ${
+                                    value <= rating
+                                      ? "fill-amber-400 text-amber-400"
+                                      : "text-muted-foreground"
+                                  }`}
+                                />
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            Your Feedback
+                          </label>
+                          <Textarea
+                            placeholder="Share your experience..."
+                            value={feedback}
+                            onChange={(event) =>
+                              setFeedback(event.target.value)
+                            }
+                            maxLength={1000}
+                            rows={4}
+                          />
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() =>
+                              handleSubmitReview(application.tuitionId)
+                            }
+                            disabled={submittingReview || !feedback.trim()}
+                          >
+                            {submittingReview && (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            Submit Review
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            onClick={() => setReviewingApplicationId(null)}
+                            disabled={submittingReview}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ),
+              )}
             </div>
           )}
         </CardContent>
