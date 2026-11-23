@@ -90,10 +90,7 @@ const PostTuitionPage = () => {
         throw new Error("Please sign in to post a tuition.");
       }
 
-      await createTuition(tuitionData, {
-        tutorEmail: session.user.email,
-        tutorName: session.user.name,
-      });
+      await createTuition(tuitionData);
 
       toast.success("Tuition posted successfully! Waiting for admin approval.");
 
@@ -107,8 +104,6 @@ const PostTuitionPage = () => {
 
       router.push("/dashboard/tutor/my-tuitions");
     } catch (error) {
-      console.error("Tuition submission error:", error);
-
       toast.error(
         error instanceof Error ? error.message : "Failed to post tuition.",
       );
