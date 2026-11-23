@@ -4,22 +4,22 @@ MentorLagbe is a full-stack tuition management and mentorship platform that conn
 
 ## Live Demo
 
-- **Live Website:** [Add Your Live Website URL]
-- **Client Repository:** [Add Your Client GitHub Repository]
-- **Server Repository:** [Add Your Server GitHub Repository]
+- **Live Website:** https://mentorlagbe-gamma.vercel.app/
+- **Client Repository:** https://github.com/mainulislamrabby/mentorlagbe-client
+- **Server Repository:** https://github.com/mainulislamrabby/mentorlagbe-server
 
 ## Admin Credentials
 
 Use the following credentials to explore the admin dashboard:
 
-- **Email:** [Admin Email]
-- **Password:** [Admin Password]
+- **Email:** nusrat.jahan@example.com
+- **Password:** Test@12345
 
 ## Test Accounts
 
 **Tutor Account**
-- **Email:** [Tutor Email]
-- **Password:** [Tutor Password]
+- **Email:** karim.hasan@example.com
+- **Password:** Test@12345
 
 **Student Account**
 - Register a new account using the Student role.
